@@ -66,11 +66,12 @@ def is_img(st):
     if magic.from_file(var + '/'  +  st, mime = 1).startswith('image'): return True
     else: return False
 
-def download(urls, filename, progressBarObj, imagepreview, choice = 0, imagecount = 0):
+def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imagecount = 0):
     print('i am here', '{} urls are here'.format(len(urls)), filename, progressBarObj, sep = '\n')
     """
     Downloads files from url and uses filename as starting name for files.
     choice : it is the way of accessing photos(like through tags, user name etc).
+    cwo : centralwidgetobject needed for preview
     """
     pgo = progressBarObj
     if choice == 1:
@@ -94,25 +95,26 @@ def download(urls, filename, progressBarObj, imagepreview, choice = 0, imagecoun
             else: print('\nAbort'); sys.exit()
         counter += var
         if is_img(imagename):
-            preview(imagename, imagepreview)
+            preview(imagename, imagepreview, cwo)
         imagecount += 1
         pgo.setProperty("value", float('{:05}'.format(counter)[:5]))
     return 1
 
-def preview(im, imprev):
+def preview(im, imprev, centralwidgetobject):
     t = Image.open(im)
     img = t.resize((251, 321), Image.ANTIALIAS)
     pix = QtGui.QPixmap.fromImage(QtGui.QImage(ImageQt(img)))
-    v1 = QtWidgets.QGraphicsScene(self.centralwidget)
+    v1 = QtWidgets.QGraphicsScene(centralwidgetobj)
     v1.addPixmap(pix)
     imprev.setScene(v1)
     #self.graphicsView.addPixmap(pix)
 
 
-def searchnDownload(str1, typ, pgo, imprev, to_search):
+def searchnDownload(str1, typ, pgo, imprev, cwo, to_search):
     print(' i am here', str1, typ, pgo, sep = '\n')
-    """ pgo is progress bar 
+    """ pgo is progressBar object
         imprev is image preview place
+        cwo is centralwidget object
     """
     if typ.lower() == 'tags':
         tags = [i.rstrip() for i in str1.split(',') if i]
@@ -162,7 +164,7 @@ def searchnDownload(str1, typ, pgo, imprev, to_search):
             os.mkdir(new_dir)
             os.chdir(new_dir)
         else: os.chdir(old_dir)
-        downloaded = download(url_list, text, choice = 0)
+        downloaded = download(url_list, text, pgo, imprev, cwo, choice = 0)
         return downloaded
         #do stuffs
     elif typ.lower() == 'name':
@@ -194,5 +196,5 @@ def searchnDownload(str1, typ, pgo, imprev, to_search):
                     susp_int = 0
             if susp_int: imagecount = int(susp_int) -1
             urls = eval(lines_urls_lgs[0].rstrip())[imagecount :]
-        downloaded = download(urls, user_name, pgo, imprev, choice = 1, imagecount = imagecount)
+        downloaded = download(urls, user_name, pgo, imprev, cwo, choice = 1, imagecount = imagecount)
     return downloaded
