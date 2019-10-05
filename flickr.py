@@ -16,6 +16,16 @@ In image preview, maintain image raio. For that first search method for getting 
 lineEdit for general text in tags mode.
 
 To handel:- ConnectionError
+
+make a reset function and pause function
+Many things like progress bar etc's handlings would be done by that.
+
+imgc not working when app quited from cross icon.
+
+Frequent same error:-
+QObject: Cannot create children for a parent that is in a different thread.
+(Parent is QWidget(0x556a9222fef0), parent's thread is QThread(0x556a9235ffd0), current thread is multithread(0x556a92b10f10)
+QObject::killTimer: Timers cannot be stopped from another thread
 """
 
 class Ui_FlickrDownloader(object):
@@ -108,7 +118,7 @@ class Ui_FlickrDownloader(object):
             #ids_handeling
             id1_set, id2_set = 0, 0
             for line in self.lines:
-                if 'id1' in line: 
+                if 'id1' in line:
                     self.dict_ids['id1'] = ''.join(line.split(' ')[1:])
                     id1_set = 1
                 if 'id2' in line:
@@ -173,30 +183,33 @@ class Ui_FlickrDownloader(object):
             self.name = self.radioButton.isChecked()
             self.work_being_done = True
             self.label_4.setText('Processing...')
-            print('label setted') # debugging
-            global flickr
-            flickr=flickrapi.FlickrAPI(self.id1, self.id2)
-            flickr_api.set_keys(api_key = self.id1, api_secret = self.id2)
-            if self.checkBox.checkState() == 2 and self.checkBox_2.checkState() == 2:
-                search_this = 'both'
-            elif self.checkBox.checkState() == 2 and self.checkBox_2.checkState() == 0:
-                search_this = 'images'
-            elif self.checkBox.checkState() == 0 and self.checkBox_2.checkState() == 2:
-                search_this = 'others'
-            if self.tag:
-                k = searchnDownload(self.lineEdit_3.text(), flickr, 'tags', self.progressBar, 
-                self.graphicsView, self.centralwidget, search_this, self.id1)
-            else:
-                k = searchnDownload(self.lineEdit_3.text(), flickr, 'name', self.progressBar, 
-                self.graphicsView, self.centralwidget, None, self.id1)
+            k = caller(self.main_runner)
             if k == 1: self.label_4.setText('Images Downloaded')
             elif k == 0: self.label_4.setText('No images found')
             os.chdir(self.main_dir)
             self.work_being_done = False
+
         """
         Scenes are visualized by graphicsView sort of objs.
         Size of graphics view:- (540, 40, 251, 321) (x, y, width, height)
         """
+    def main_runner(self):
+        global flickr
+        flickr=flickrapi.FlickrAPI(self.id1, self.id2)
+        flickr_api.set_keys(api_key = self.id1, api_secret = self.id2)
+        if self.checkBox.checkState() == 2 and self.checkBox_2.checkState() == 2:
+            search_this = 'both'
+        elif self.checkBox.checkState() == 2 and self.checkBox_2.checkState() == 0:
+            search_this = 'images'
+        elif self.checkBox.checkState() == 0 and self.checkBox_2.checkState() == 2:
+            search_this = 'others'
+        if self.tag:
+            k = searchnDownload(self.lineEdit_3.text(), flickr, 'tags', self.progressBar,
+            self.graphicsView, self.centralwidget, search_this, self.id1)
+        else:
+            k = searchnDownload(self.lineEdit_3.text(), flickr, 'name', self.progressBar,
+            self.graphicsView, self.centralwidget, None, self.id1)
+        return k
 
 if __name__ == "__main__":
     import sys

@@ -3,10 +3,22 @@ import flickr_api
 import urllib.request
 import time, magic
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QThread
 from PIL import Image
 from PIL.ImageQt import ImageQt
 import os, sys, time
 
+class multithread(QThread):
+    def __init__(self, obj):
+        self.obj = obj
+        super().__init__()
+    def run(self):
+        self.obj()
+
+def caller(x):
+    global y
+    y = multithread(x)  #prevented from garbage collection
+    return y.start()
 
 def url_list_maker(flickr_obj, uiv):
     """
@@ -67,7 +79,6 @@ def is_img(st):
     else: return False
 
 def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imagecount = 0):
-    print('i came in down', urls)
     """
     Downloads files from url and uses filename as starting name for files.
     choice : it is the way of accessing photos(like through tags, user name etc).
@@ -99,7 +110,7 @@ def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imag
         if is_img(imagename):
             preview(imagename, imagepreview, cwo)
         imagecount += 1
-        #pgo.setProperty("value", float('{:05}'.format(counter)[:5])) #segmentation fault occuring
+        #pgo.setProperty("value", int(counter))  ##so many errors being produced here
     return 1
 
 def preview(im, imprev, centralwidgetobj):
@@ -113,7 +124,6 @@ def preview(im, imprev, centralwidgetobj):
 
 
 def searchnDownload(str1, flickr, typ, pgo, imprev, cwo, to_search, api_key_val):
-    print("i came in sndown")
     """ pgo is progressBar object
         imprev is image preview place(here graphicsView)
         cwo is centralwidget object
