@@ -63,11 +63,11 @@ def input_anim(string, t=0.05):
     return input()
 
 def is_img(st):
-    if magic.from_file(var + '/'  +  st, mime = 1).startswith('image'): return True
+    if magic.from_file(os.path.abspath(st), mime = 1).startswith('image'): return True
     else: return False
 
 def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imagecount = 0):
-    print('i am here', '{} urls are here'.format(len(urls)), filename, progressBarObj, sep = '\n')
+    print('i came in down', urls)
     """
     Downloads files from url and uses filename as starting name for files.
     choice : it is the way of accessing photos(like through tags, user name etc).
@@ -81,6 +81,8 @@ def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imag
     if k1 == 0:
         return 0
     var = 100.0/(k1*1.0)
+    urls = [i for i in urls if i]
+    if not urls: return 0
     for i in urls:
         imagename = '{1}{0}.{2}'.format(imagecount, filename[0], i.split('.')[-1])
         try: urllib.request.urlretrieve( i, imagename)
@@ -97,10 +99,10 @@ def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imag
         if is_img(imagename):
             preview(imagename, imagepreview, cwo)
         imagecount += 1
-        pgo.setProperty("value", float('{:05}'.format(counter)[:5]))
+        #pgo.setProperty("value", float('{:05}'.format(counter)[:5])) #segmentation fault occuring
     return 1
 
-def preview(im, imprev, centralwidgetobject):
+def preview(im, imprev, centralwidgetobj):
     t = Image.open(im)
     img = t.resize((251, 321), Image.ANTIALIAS)
     pix = QtGui.QPixmap.fromImage(QtGui.QImage(ImageQt(img)))
@@ -110,12 +112,13 @@ def preview(im, imprev, centralwidgetobject):
     #self.graphicsView.addPixmap(pix)
 
 
-def searchnDownload(str1, typ, pgo, imprev, cwo, to_search):
-    print(' i am here', str1, typ, pgo, sep = '\n')
+def searchnDownload(str1, flickr, typ, pgo, imprev, cwo, to_search, api_key_val):
+    print("i came in sndown")
     """ pgo is progressBar object
-        imprev is image preview place
+        imprev is image preview place(here graphicsView)
         cwo is centralwidget object
     """
+    bool_broad = 0 ## pretending that i have bool_broad, have to fix it.
     if typ.lower() == 'tags':
         tags = [i.rstrip() for i in str1.split(',') if i]
         #bool_broad = int(input_anim('You wanna search broad category or strict in tagging?\
@@ -125,24 +128,24 @@ def searchnDownload(str1, typ, pgo, imprev, cwo, to_search):
         if bool_broad == 1:
             t = flickr.tags.getRelated(api_key = api_key_val, tag = tags)
             tags = [[j.text for j in i] for i in t][0]
-            if isinstance(to_search, None):
+            if not to_search or to_search == 'both':
                 searched_elem = flickr.photos.search(api_key = api_key_val, tags = tags, 
             text = text, accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o',
-            per_page = 10)#int(input_anim('how many images(max 500): ').rstrip())) 
+            per_page = 3)#int(input_anim('how many images(max 500): ').rstrip())) 
             #there is media argument, per_page and page too. GUI handling needed.
             elif to_search == 'images' or to_search == 'others':
                 searched_elem = flickr.photos.search(api_key = api_key_val, tags = tags, 
-            text = text, accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o',
-            per_page = 10, media = to_search)
+                accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o',
+            per_page = 3, media = to_search)
         else:
-            if isinstance(to_search, None):
+            if not to_search or to_search == 'both':
                 searched_elem = flickr.photos.search(api_key = api_key_val, tags = tags,
-            text = text, accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o', 
-            per_page = 10)#int(input_anim('how many images(max 500): ').rstrip()))
+                accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o', 
+            per_page = 3)#int(input_anim('how many images(max 500): ').rstrip()))
             elif to_search == 'images' or to_search == 'others':
                 searched_elem = flickr.photos.search(api_key = api_key_val, tags = tags,
-            text = text, accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o', 
-            per_page = 10, media = to_search)
+                accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o', 
+            per_page = 3, media = to_search)
         photo_elems = [[j for j in i] for i in searched_elem][0]
         url_list = []
         counter_photo, printed, len_p = 1, False, 0
@@ -152,19 +155,21 @@ def searchnDownload(str1, typ, pgo, imprev, cwo, to_search):
                 md = flickr.photos.getSizes(api_key = api_key_val, photo_id = dict_['id'])
                 t1 = [[j.attrib['source'] for j in i][-1] for i in md][0]
                 url_list.append(t1)
-            except KeyboardInterrupt: 
+            except KeyboardInterrupt:
                 print('\nAbort')
                 sys.exit()
             except:
                 printed = False
                 anim_write('Error occured in retrieving url, Ignoring')
         #directory work
-        new_dir, old_dir = mkname('Flickr_Imgs_{}'.format('_'.join(text.split(' '))))
+        v1 = tags[0].split(' ')
+        v2 = v1 + ['etcs']
+        new_dir, old_dir = mkname('Flickr_Imgs_{}'.format('_'.join([i for i in v2 if i])))
         if not os.path.exists(old_dir):
             os.mkdir(new_dir)
             os.chdir(new_dir)
         else: os.chdir(old_dir)
-        downloaded = download(url_list, text, pgo, imprev, cwo, choice = 0)
+        downloaded = download(url_list, v1, pgo, imprev, cwo, choice = 0)
         return downloaded
         #do stuffs
     elif typ.lower() == 'name':
@@ -194,6 +199,8 @@ def searchnDownload(str1, typ, pgo, imprev, cwo, to_search):
                     var.write(str(urls))
                     var.write('\n')
                     susp_int = 0
+            with open('.temp-logs', 'r+') as var:
+                lines_urls_lgs = var.readlines()
             if susp_int: imagecount = int(susp_int) -1
             urls = eval(lines_urls_lgs[0].rstrip())[imagecount :]
         downloaded = download(urls, user_name, pgo, imprev, cwo, choice = 1, imagecount = imagecount)

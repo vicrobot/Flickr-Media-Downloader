@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-
+#! usr/bin/env python3
 from defs import *
+import faulthandler
+faulthandler.enable()
 
 """
 To dos:-
@@ -9,6 +11,11 @@ Folder choice.
 broad search, or narrow in tags
 
 per_page images, fading of image and video checkbox when user_name radio button is clicked.
+In image preview, maintain image raio. For that first search method for getting information about the image width and height.(dimensions)
+
+lineEdit for general text in tags mode.
+
+To handel:- ConnectionError
 """
 
 class Ui_FlickrDownloader(object):
@@ -87,6 +94,7 @@ class Ui_FlickrDownloader(object):
         self.pushButton.clicked.connect(self.go)
         self.checkBox_3.clicked.connect(self.cb3)
         self.lineEdit_3.setText('search here (comma separated)')
+        self.main_dir = os.getcwd()
         if not os.path.exists('logs'): self.checkBox_3.setDisabled(True)
         else:
             self.api_set = False
@@ -161,25 +169,30 @@ class Ui_FlickrDownloader(object):
         else:
             with open('logs', 'w+') as var:
                 var.writelines(['id1 {}\n'.format(self.id1), 'id2 {}'.format(self.id2)])
-                self.tag = self.radioButton_2.isChecked()
-                self.name = self.radioButton.isChecked()
-                self.work_being_done = True
-                self.label_4.setText('Processing...')
-                global flickr
-                flickr=flickrapi.FlickrAPI(self.id1, self.id2)
-                flickr_api.set_keys(api_key = self.id1, api_secret = self.id2)
-                if self.checkBox.checkState() == 2 and self.checkBox_2.checkState() == 2:
-                    search_this = 'both'
-                elif self.checkBox.checkState() == 2 and self.checkBox_2.checkState() == 0:
-                    search_this = 'images'
-                elif self.checkBox.checkState() == 0 and self.checkBox_2.checkState() == 2:
-                    search_this = 'others'
-                if self.tag:
-                    k = searchnDownload(self.lineEdit_3.text(), 'tags', self.progressBar, search_this)
-                else:
-                    k = searchnDownload(self.lineEdit_3.text(), 'name', self.progressBar, None)
-                if k == 1: self.label_4.setText('Images Downloaded')
-                elif k == 0: self.label_4.setText('No images found')
+            self.tag = self.radioButton_2.isChecked()
+            self.name = self.radioButton.isChecked()
+            self.work_being_done = True
+            self.label_4.setText('Processing...')
+            print('label setted') # debugging
+            global flickr
+            flickr=flickrapi.FlickrAPI(self.id1, self.id2)
+            flickr_api.set_keys(api_key = self.id1, api_secret = self.id2)
+            if self.checkBox.checkState() == 2 and self.checkBox_2.checkState() == 2:
+                search_this = 'both'
+            elif self.checkBox.checkState() == 2 and self.checkBox_2.checkState() == 0:
+                search_this = 'images'
+            elif self.checkBox.checkState() == 0 and self.checkBox_2.checkState() == 2:
+                search_this = 'others'
+            if self.tag:
+                k = searchnDownload(self.lineEdit_3.text(), flickr, 'tags', self.progressBar, 
+                self.graphicsView, self.centralwidget, search_this, self.id1)
+            else:
+                k = searchnDownload(self.lineEdit_3.text(), flickr, 'name', self.progressBar, 
+                self.graphicsView, self.centralwidget, None, self.id1)
+            if k == 1: self.label_4.setText('Images Downloaded')
+            elif k == 0: self.label_4.setText('No images found')
+            os.chdir(self.main_dir)
+            self.work_being_done = False
         """
         Scenes are visualized by graphicsView sort of objs.
         Size of graphics view:- (540, 40, 251, 321) (x, y, width, height)
