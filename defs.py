@@ -8,6 +8,12 @@ from PIL import Image
 from PIL.ImageQt import ImageQt
 import os, sys, time
 
+
+### see this:- ###############################
+"""
+If EOF error in violation of protocol error occurs:-
+https://stackoverflow.com/q/33410577/9134528:- This suggests to do this:- $ pip install ndg-httpsclient
+"""
 class multithread(QThread):
     def __init__(self, obj):
         self.obj = obj
@@ -16,7 +22,7 @@ class multithread(QThread):
         self.obj()
 
 def caller(x):
-    global y
+    global y            #this and below
     y = multithread(x)  #prevented from garbage collection
     return y.start()
 
@@ -48,10 +54,25 @@ def mkname(name):
         new_n = name + str(num)
     return(new_n, old_n)
 
+def resize(tup1, tup2):
+    l1, b1 = tup1
+    ratio = l1/b1
+    b2, l2 = tup2   # here there is mis-standardization; thus swapped.
+    if l1 > b1:
+        l1 = l2
+        b1 = int(l1*(1/ratio)- 1)
+    elif l1 < b1:
+        b1 = b2
+        l1 = int(b1*ratio -1)
+    else:
+        l1 = l2
+        b1 = l1
+    return (l1, b1)
+
 def checkIds(akv, skv, print_M = 0):
     """
     Checks whether the provided keys are correct or not.
-    akv is access key, akv is secret key.
+    akv is access key, skv is secret key.
     print_M is used for showing a message if keys were wrong.
     """
     flickr_api.set_keys(api_key = akv, api_secret = skv)
@@ -115,7 +136,9 @@ def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imag
 
 def preview(im, imprev, centralwidgetobj):
     t = Image.open(im)
-    img = t.resize((251, 321), Image.ANTIALIAS)
+    k = imprev.size()
+    img_targetSize = k.height(), k.width()
+    img = t.resize(resize(t.size, img_targetSize ), Image.ANTIALIAS)
     pix = QtGui.QPixmap.fromImage(QtGui.QImage(ImageQt(img)))
     v1 = QtWidgets.QGraphicsScene(centralwidgetobj)
     v1.addPixmap(pix)
