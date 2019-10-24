@@ -40,6 +40,14 @@ def url_list_maker(flickr_obj, uiv):
         except: pass
     return url_list
 
+def preview(img, k1):
+    #k1 is the place to visualize the image. 
+    filename = img
+    pixmap = QtGui.QPixmap(filename)
+    pixmap = pixmap.scaled(k1.width(), k1.height(), QtCore.Qt.KeepAspectRatio)
+    k1.setPixmap(pixmap)
+    k1.setAlignment(QtCore.Qt.AlignCenter)
+
 def mkname(name):
     """
     Returns a possible non-conflicting name able to be created in current directory.
@@ -129,21 +137,11 @@ def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imag
             else: print('\nAbort'); sys.exit()
         counter += var
         if is_img(imagename):
-            preview(imagename, imagepreview, cwo)
+            preview(imagename, imagepreview)
+            time.sleep(1)
         imagecount += 1
-        #pgo.setProperty("value", int(counter))  ##so many errors being produced here
+        pgo.setProperty("value", int(counter))  ##so many errors being produced here
     return 1
-
-def preview(im, imprev, centralwidgetobj):
-    t = Image.open(im)
-    k = imprev.size()
-    img_targetSize = k.height(), k.width()
-    img = t.resize(resize(t.size, img_targetSize ), Image.ANTIALIAS)
-    pix = QtGui.QPixmap.fromImage(QtGui.QImage(ImageQt(img)))
-    v1 = QtWidgets.QGraphicsScene(centralwidgetobj)
-    v1.addPixmap(pix)
-    imprev.setScene(v1)
-    #self.graphicsView.addPixmap(pix)
 
 
 def searchnDownload(str1, flickr, typ, pgo, imprev, cwo, to_search, api_key_val):
