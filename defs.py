@@ -24,7 +24,7 @@ class multithread(QThread):
 def caller(x):
     global y            #this and below
     y = multithread(x)  #prevented from garbage collection
-    return y.start()
+    y.start()
 
 def url_list_maker(flickr_obj, uiv):
     """
@@ -61,21 +61,6 @@ def mkname(name):
         num += 1
         new_n = name + str(num)
     return(new_n, old_n)
-
-def resize(tup1, tup2):
-    l1, b1 = tup1
-    ratio = l1/b1
-    b2, l2 = tup2   # here there is mis-standardization; thus swapped.
-    if l1 > b1:
-        l1 = l2
-        b1 = int(l1*(1/ratio)- 1)
-    elif l1 < b1:
-        b1 = b2
-        l1 = int(b1*ratio -1)
-    else:
-        l1 = l2
-        b1 = l1
-    return (l1, b1)
 
 def checkIds(akv, skv, print_M = 0):
     """
