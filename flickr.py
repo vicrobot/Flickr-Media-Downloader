@@ -185,9 +185,7 @@ class Ui_FlickrDownloader(object):
             self.name = self.radioButton.isChecked()
             self.work_being_done = True
             self.label_4.setText('Processing...')
-            k = caller(self.main_runner)
-            if k == 1: self.label_4.setText('Images Downloaded')
-            elif k == 0: self.label_4.setText('No images found')
+            caller(self.main_runner)
             os.chdir(self.main_dir)
             self.work_being_done = False
 
@@ -208,9 +206,13 @@ class Ui_FlickrDownloader(object):
         if self.tag:
             k = searchnDownload(self.lineEdit_3.text(), flickr, 'tags', self.progressBar,
             self.label_5, self.centralwidget, search_this, self.id1)
+            if k == 1: self.label_4.setText('Images Downloaded')
+            elif k == 0: self.label_4.setText('No images found')
         else:
             k = searchnDownload(self.lineEdit_3.text(), flickr, 'name', self.progressBar,
             self.label_5, self.centralwidget, None, self.id1)
+            if k == 1: self.label_4.setText('Images Downloaded')
+            elif k == 0: self.label_4.setText('No images found')
         return k
 
 if __name__ == "__main__":
