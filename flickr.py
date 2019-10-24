@@ -190,8 +190,7 @@ class Ui_FlickrDownloader(object):
             self.work_being_done = False
 
         """
-        Scenes are visualized by graphicsView sort of objs.
-        Size of graphics view:- (540, 40, 251, 321) (x, y, width, height)
+        (540, 40, 251, 321) -> (x, y, width, height)
         """
     def main_runner(self):
         global flickr
