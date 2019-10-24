@@ -91,9 +91,11 @@ class Ui_FlickrDownloader(object):
         self.label_4.setGeometry(QtCore.QRect(210, 20, 191, 31))
         self.label_4.setText("")
         self.label_4.setObjectName("label_4")
-        self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(540, 40, 251, 321))
-        self.graphicsView.setObjectName("graphicsView")
+        self.label_5 = QtWidgets.QLabel(self.centralwidget)
+        self.label_5.setGeometry(QtCore.QRect(540, 40, 251, 321))
+        self.label_5.setFrameShape(QtWidgets.QFrame.Box)
+        self.label_5.setText("")
+        self.label_5.setObjectName("label")
         FlickrDownloader.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(FlickrDownloader)
         self.statusbar.setObjectName("statusbar")
@@ -205,10 +207,10 @@ class Ui_FlickrDownloader(object):
             search_this = 'others'
         if self.tag:
             k = searchnDownload(self.lineEdit_3.text(), flickr, 'tags', self.progressBar,
-            self.graphicsView, self.centralwidget, search_this, self.id1)
+            self.label_5, self.centralwidget, search_this, self.id1)
         else:
             k = searchnDownload(self.lineEdit_3.text(), flickr, 'name', self.progressBar,
-            self.graphicsView, self.centralwidget, None, self.id1)
+            self.label_5, self.centralwidget, None, self.id1)
         return k
 
 if __name__ == "__main__":
