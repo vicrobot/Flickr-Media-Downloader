@@ -255,7 +255,6 @@ class Ui_FlickrDownloader(object):
                     self.dict_ids['id2'] = ''.join(line.split(' ')[1:])
                     id2_set = 1
             if not id1_set or not id2_set: self.checkBox_3.setDisabled(True)
-        self.work_being_done = False
     def retranslateUi(self, FlickrDownloader):
         _translate = QtCore.QCoreApplication.translate
         FlickrDownloader.setWindowTitle(_translate("FlickrDownloader", "Flickr Media Downloader"))
@@ -276,7 +275,6 @@ class Ui_FlickrDownloader(object):
             self.lineEdit_2.setText(self.dict_ids['id2'])
             self.api_set = True
     def go(self):
-        if self.work_being_done: return
         if not self.radioButton.isChecked() and not self.radioButton_2.isChecked():
             #message here
             message('select search criteria ', self.label_4)
@@ -313,11 +311,13 @@ class Ui_FlickrDownloader(object):
                 var.writelines(['id1 {}\n'.format(self.id1), 'id2 {}'.format(self.id2)])
             self.tag = self.radioButton_2.isChecked()
             self.name = self.radioButton.isChecked()
-            self.work_being_done = True
+            self.pushButton.setDisabled(True)
+            self.label_7.setStyleSheet("background-color: rgb(255, 0, 255);")
+            self.label_8.setStyleSheet("background-color: rgb(41, 180, 255);\n"
+"background-color: rgb(39, 89, 255);")
             self.label_4.setText('Processing...')
             caller(self.main_runner)
             os.chdir(self.main_dir)
-            self.work_being_done = False
 
         """
         (540, 40, 251, 321) -> (x, y, width, height)
@@ -342,6 +342,7 @@ class Ui_FlickrDownloader(object):
             [self.label_5, self.label_7, self.label_8], self.centralwidget, self.spinBox, None, self.id1)
             if k == 1: self.label_4.setText('Images Downloaded')
             elif k == 0: self.label_4.setText('No images found')
+        self.pushButton.setDisabled(False)
         return k
 
 if __name__ == "__main__":
