@@ -91,6 +91,7 @@ class Ui_FlickrDownloader(object):
         self.spinBox.setFont(font)
         self.spinBox.setMaximum(500)
         self.spinBox.setProperty("value", 20)
+        self.spinBox.setMinimum(1)
         self.spinBox.setObjectName("spinBox")
         self.gridLayout.addWidget(self.spinBox, 6, 1, 1, 1)
         self.lineEdit_2 = QtWidgets.QLineEdit(self.centralwidget)
