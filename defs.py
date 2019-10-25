@@ -1,6 +1,7 @@
 import flickrapi
 import flickr_api
 import urllib.request
+import urllib
 import time, magic
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QThread
@@ -47,6 +48,9 @@ def preview(img, k1):
     pixmap = pixmap.scaled(k1.width(), k1.height(), QtCore.Qt.KeepAspectRatio)
     k1.setPixmap(pixmap)
     k1.setAlignment(QtCore.Qt.AlignCenter)
+
+def message(message, k1):
+    k1.setText(message)
 
 def mkname(name):
     """
@@ -108,10 +112,11 @@ def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imag
     var = 100.0/(k1*1.0)
     urls = [i for i in urls if i]
     if not urls: return 0
+    second, third = '', ''
     for i in urls:
         imagename = '{1}{0}.{2}'.format(imagecount, filename[0], i.split('.')[-1])
         try: urllib.request.urlretrieve( i, imagename)
-        except KeyboardInterrupt:
+        except urllib.error.URLError:
             if choice == 1:
                 #only for choice == 1 since no need to store urls for search results as they vary.
                 with open('.temp-logs', 'w+') as var:
@@ -122,17 +127,23 @@ def download(urls, filename, progressBarObj, imagepreview, cwo, choice = 0, imag
             else: print('\nAbort'); sys.exit()
         counter += var
         if is_img(imagename):
-            preview(imagename, imagepreview)
+            if third: preview(third, imagepreview[2])
+            if second:
+                preview(second, imagepreview[1])
+                third = second
+            preview(imagename, imagepreview[0])
+            second = imagename
             time.sleep(1)
         imagecount += 1
         pgo.setProperty("value", int(counter))  ##so many errors being produced here
     return 1
 
 
-def searchnDownload(str1, flickr, typ, pgo, imprev, cwo, to_search, api_key_val):
+def searchnDownload(str1, flickr, typ, pgo, imprev_list, cwo, spb, to_search, api_key_val):
     """ pgo is progressBar object
-        imprev is image preview place(here graphicsView)
+        imprev_list is  list of image preview places in seq.
         cwo is centralwidget object
+        spb is spinBox objecy
     """
     bool_broad = 0 ## pretending that i have bool_broad, have to fix it.
     if typ.lower() == 'tags':
@@ -140,28 +151,28 @@ def searchnDownload(str1, flickr, typ, pgo, imprev, cwo, to_search, api_key_val)
         #bool_broad = int(input_anim('You wanna search broad category or strict in tagging?\
         #(1 for former/prior, 0 for later):').rstrip())
         #text = input_anim("Give a general text for search: ").strip()
-    
+        nums = int(spb.text().strip())
         if bool_broad == 1:
             t = flickr.tags.getRelated(api_key = api_key_val, tag = tags)
             tags = [[j.text for j in i] for i in t][0]
             if not to_search or to_search == 'both':
                 searched_elem = flickr.photos.search(api_key = api_key_val, tags = tags, 
             text = text, accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o',
-            per_page = 3)#int(input_anim('how many images(max 500): ').rstrip())) 
+            per_page = nums)#int(input_anim('how many images(max 500): ').rstrip())) 
             #there is media argument, per_page and page too. GUI handling needed.
             elif to_search == 'images' or to_search == 'others':
                 searched_elem = flickr.photos.search(api_key = api_key_val, tags = tags, 
                 accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o',
-            per_page = 3, media = to_search)
+            per_page = nums, media = to_search)
         else:
             if not to_search or to_search == 'both':
                 searched_elem = flickr.photos.search(api_key = api_key_val, tags = tags,
                 accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o', 
-            per_page = 3)#int(input_anim('how many images(max 500): ').rstrip()))
+            per_page = nums)#int(input_anim('how many images(max 500): ').rstrip()))
             elif to_search == 'images' or to_search == 'others':
                 searched_elem = flickr.photos.search(api_key = api_key_val, tags = tags,
                 accuracy = 1, safe_search = 1, content_type = 1, extras = 'url_o', 
-            per_page = 3, media = to_search)
+            per_page = nums, media = to_search)
         photo_elems = [[j for j in i] for i in searched_elem][0]
         url_list = []
         counter_photo, printed, len_p = 1, False, 0
@@ -185,7 +196,7 @@ def searchnDownload(str1, flickr, typ, pgo, imprev, cwo, to_search, api_key_val)
             os.mkdir(new_dir)
             os.chdir(new_dir)
         else: os.chdir(old_dir)
-        downloaded = download(url_list, v1, pgo, imprev, cwo, choice = 0)
+        downloaded = download(url_list, v1, pgo, imprev_list, cwo, choice = 0)
         return downloaded
         #do stuffs
     elif typ.lower() == 'name':
@@ -219,5 +230,5 @@ def searchnDownload(str1, flickr, typ, pgo, imprev, cwo, to_search, api_key_val)
                 lines_urls_lgs = var.readlines()
             if susp_int: imagecount = int(susp_int) -1
             urls = eval(lines_urls_lgs[0].rstrip())[imagecount :]
-        downloaded = download(urls, user_name, pgo, imprev, cwo, choice = 1, imagecount = imagecount)
+        downloaded = download(urls, user_name, pgo, imprev_list, cwo, choice = 1, imagecount = imagecount)
     return downloaded
