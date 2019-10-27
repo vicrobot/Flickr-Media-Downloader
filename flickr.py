@@ -299,25 +299,27 @@ class Ui_FlickrDownloader(object):
         else:
             self.id1 = self.lineEdit.text()
             self.id2 = self.lineEdit_2.text()
-        if not checkIds(self.id1, self.id2):
-            self.lineEdit.clear()
-            self.lineEdit_2.clear()
-            self.checkBox_3.setChecked(False)
-            self.api_set = False
-            self.label_4.setText('Wrong Keys!! Try Again')
-            return
-        else:
-            with open('logs', 'w+') as var:
-                var.writelines(['id1 {}\n'.format(self.id1), 'id2 {}'.format(self.id2)])
-            self.tag = self.radioButton_2.isChecked()
-            self.name = self.radioButton.isChecked()
-            self.pushButton.setDisabled(True)
-            self.label_7.setStyleSheet("background-color: rgb(255, 0, 255);")
-            self.label_8.setStyleSheet("background-color: rgb(41, 180, 255);\n"
-"background-color: rgb(39, 89, 255);")
-            self.label_4.setText('Processing...')
-            caller(self.main_runner)
-            os.chdir(self.main_dir)
+        try:
+            if not checkIds(self.id1, self.id2):
+                self.lineEdit.clear()
+                self.lineEdit_2.clear()
+                self.checkBox_3.setChecked(False)
+                self.api_set = False
+                self.label_4.setText('Wrong Keys!! Try Again')
+                return
+            else:
+                with open('logs', 'w+') as var:
+                    var.writelines(['id1 {}\n'.format(self.id1), 'id2 {}'.format(self.id2)])
+                self.tag = self.radioButton_2.isChecked()
+                self.name = self.radioButton.isChecked()
+                self.pushButton.setDisabled(True)
+                self.label_7.setStyleSheet("background-color: rgb(255, 0, 255);")
+                self.label_8.setStyleSheet("background-color: rgb(41, 180, 255);\n"
+    "background-color: rgb(39, 89, 255);")
+                self.label_4.setText('Processing...')
+                caller(self.main_runner)
+                os.chdir(self.main_dir)
+        except NetworkError: message('Network Error !!\n Try Again', self.label_4)
 
         """
         (540, 40, 251, 321) -> (x, y, width, height)
@@ -338,12 +340,14 @@ class Ui_FlickrDownloader(object):
             if k == 1: self.label_4.setText('Images Downloaded')
             elif k == 0: self.label_4.setText('No images found')
         else:
-            k = searchnDownload(self.lineEdit_3.text(), flickr, 'name', self.progressBar,
-            [self.label_5, self.label_7, self.label_8], self.centralwidget, self.spinBox, None, self.id1)
-            if k == 1: self.label_4.setText('Images Downloaded')
-            elif k == 0: self.label_4.setText('No images found')
+            try:
+                k = searchnDownload(self.lineEdit_3.text(), flickr, 'name', self.progressBar,
+                [self.label_5, self.label_7, self.label_8], self.centralwidget, self.spinBox, None, self.id1)
+                if k == 1: self.label_4.setText('Images Downloaded')
+                elif k == 0: self.label_4.setText('No images found')
+            except NoUserFound:
+                message('User Name Invalid !!', self.label_4)
         self.pushButton.setDisabled(False)
-        return k
 
 if __name__ == "__main__":
     import sys
