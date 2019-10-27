@@ -1,6 +1,7 @@
 import flickrapi
 import flickr_api
 import urllib.request
+import requests
 import urllib
 import time, magic
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -8,6 +9,7 @@ from PyQt5.QtCore import QThread
 from PIL import Image
 from PIL.ImageQt import ImageQt
 import os, sys, time
+from error import *
 
 
 ### see this:- ###############################
@@ -77,6 +79,8 @@ def checkIds(akv, skv, print_M = 0):
     except flickr_api.flickrerrors.FlickrAPIError:
         if print_M: anim_write("Wrong Keys!!", "Try again")
         return 0
+    except requests.exceptions.ConnectionError:
+        raise NetworkError
     return 1
 
 def anim_write(*string, t = 0.02):
@@ -202,7 +206,8 @@ def searchnDownload(str1, flickr, typ, pgo, imprev_list, cwo, spb, to_search, ap
     elif typ.lower() == 'name':
         user_name = ''.join([i.rstrip() for i in str1.split(',') if i])
         #do stuffs
-        user_id_val = flickr_api.Person.findByUserName(user_name).id
+        try:user_id_val = flickr_api.Person.findByUserName(user_name).id
+        except: raise NoUserFound
         #directory work
         new_dir, old_dir = mkname('Flickr_Imgs_{}'.format('_'.join(user_name.split(' '))))
         if not os.path.exists(old_dir):
