@@ -15,8 +15,6 @@ In image preview, maintain image raio. For that first search method for getting 
 
 lineEdit for general text in tags mode.
 
-To handel:- ConnectionError
-
 make a reset function and pause function
 Many things like progress bar etc's handlings would be done by that.
 
