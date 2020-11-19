@@ -1,0 +1,4 @@
+flickr-api
+flickrapi
+python-magic
+pyqt5
