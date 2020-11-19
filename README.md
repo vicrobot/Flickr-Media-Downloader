@@ -22,6 +22,8 @@ For python3 versions older than python3.6:
 After installing flickr_api by requirements.txt, you'll need to edit one file in it.
 Go to your python directory > site_packages > flickr_api > method_call.py
 Replace line 144: 
+    
     resp = json.loads(resp.content)
 with
+    
     resp = json.loads(resp.content.decode('utf-8'))
